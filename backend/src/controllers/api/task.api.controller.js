@@ -3,6 +3,8 @@ import { List } from "../../models/list.models.js";
 import { Task } from "../../models/task.models.js";
 import { ensureBoardMember, ensureListInBoard, logActivity } from "../../utils/api-helpers.js";
 
+const extractMemberUserId = (member) => String(member?.user?._id || member?.user || member || "");
+
 export const listTasks = async (req, res) => {
   try {
     const { board } = req.query;
@@ -201,9 +203,6 @@ export const assignTask = async (req, res) => {
   try {
     const { id } = req.params;
     const { assigneeId } = req.body;
-    if (!assigneeId) {
-      return res.status(400).json({ error: "assigneeId is required" });
-    }
 
     const task = await Task.findById(id);
     if (!task) {
@@ -215,12 +214,18 @@ export const assignTask = async (req, res) => {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const isMember = board.members.some((memberId) => String(memberId) === String(assigneeId));
-    if (!isMember) {
-      return res.status(400).json({ error: "Assignee is not a board member" });
+    const normalizedAssigneeId = assigneeId ? String(assigneeId) : "";
+
+    if (normalizedAssigneeId) {
+      const isMember = (board.members || []).some(
+        (member) => extractMemberUserId(member) === normalizedAssigneeId,
+      );
+      if (!isMember) {
+        return res.status(400).json({ error: "Assignee is not a board member" });
+      }
     }
 
-    task.assignee = assigneeId;
+    task.assignee = normalizedAssigneeId || null;
     await task.save();
 
     await logActivity({
@@ -229,7 +234,7 @@ export const assignTask = async (req, res) => {
       entityId: task._id,
       board: task.board,
       user: req.user._id,
-      details: { title: task.title, assigneeId },
+      details: { title: task.title, assigneeId: normalizedAssigneeId || null },
     });
 
     return res.status(200).json(task);

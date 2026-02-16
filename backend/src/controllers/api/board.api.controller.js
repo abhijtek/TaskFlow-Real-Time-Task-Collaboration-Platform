@@ -7,6 +7,8 @@ import { User } from "../../models/user.models.js";
 import { ensureBoardMember, ensureWorkspaceMember, logActivity } from "../../utils/api-helpers.js";
 import { serializeUser } from "../../middlewares/api-auth.middleware.js";
 
+const extractMemberUserId = (member) => member?.user?._id || member?.user || member;
+
 export const listBoards = async (req, res) => {
   try {
     const { workspace } = req.query;
@@ -35,10 +37,14 @@ export const getBoard = async (req, res) => {
     }
     // Allow all board members to fetch board details
 
+    const memberUserIds = (board.members || [])
+      .map((member) => extractMemberUserId(member))
+      .filter(Boolean);
+
     const [lists, tasks, membersData] = await Promise.all([
       List.find({ board: id }).sort({ position: 1, createdAt: 1 }),
       Task.find({ board: id }).sort({ position: 1, createdAt: 1 }),
-      User.find({ _id: { $in: board.members } }).select(
+      User.find({ _id: { $in: memberUserIds } }).select(
         "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
       ),
     ]);

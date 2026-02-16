@@ -26,7 +26,7 @@ export default function TaskDetailDialog({
       setDescription(task.description || "");
       setPriority(task.priority || "medium");
       setDueDate(task.dueDate ? task.dueDate.split("T")[0] : "");
-      setAssigneeId(task.assignee || "");
+      setAssigneeId(String(task.assignee?._id || task.assignee || ""));
     }
   }, [task, open]);
 
@@ -35,6 +35,7 @@ export default function TaskDetailDialog({
 
     setLoading(true);
     try {
+      const currentAssigneeId = String(task.assignee?._id || task.assignee || "");
       let updated = await taskService.update(task._id, {
         title: title.trim(),
         description: description.trim(),
@@ -42,8 +43,8 @@ export default function TaskDetailDialog({
         dueDate: dueDate || null,
       });
 
-      if (assigneeId && assigneeId !== (task.assignee || "")) {
-        updated = await taskService.assign(task._id, assigneeId);
+      if (assigneeId !== currentAssigneeId) {
+        updated = await taskService.assign(task._id, assigneeId || null);
       }
 
       emitTaskUpdated({ ...task, ...updated }); // Emit socket event for live update
