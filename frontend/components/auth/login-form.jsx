@@ -27,11 +27,6 @@ export default function LoginForm() {
     }
   };
 
-  const fillDemo = () => {
-    setEmail("demo@hintro.com");
-    setPassword("demo123");
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -119,14 +114,6 @@ export default function LoginForm() {
             )}
           </button>
 
-          <button
-            type="button"
-            onClick={fillDemo}
-            className="h-9 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex items-center justify-center gap-2"
-          >
-            <Zap className="w-3.5 h-3.5" />
-            Use demo credentials
-          </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">

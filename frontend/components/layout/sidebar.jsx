@@ -173,7 +173,7 @@ export default function Sidebar() {
                 </button>
                 <button
                   onClick={() => setInviteOpen(!inviteOpen)}
-                  className="text-xs text-primary dark:text-white hover:underline flex items-center gap-0.5"
+                  className="h-6 px-2 rounded-md border border-border bg-background text-xs text-foreground hover:bg-secondary transition-colors inline-flex items-center gap-1"
                 >
                   <UserPlus className="w-3 h-3" />
                   Invite
