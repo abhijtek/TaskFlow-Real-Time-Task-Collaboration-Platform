@@ -8,7 +8,6 @@
 ![License](https://img.shields.io/badge/License-ISC-blue)
 
 ## Table of Contents
-- [0. Submission Checklist](#0-submission-checklist)
 - [1. Introduction](#1-introduction)
 - [2. Features](#2-features)
 - [3. Tech Stack](#3-tech-stack)
@@ -29,19 +28,6 @@
 - [18. Usage Flow](#18-usage-flow)
 - [19. Security Notes](#19-security-notes)
 - [20. Recruiter Notes](#20-recruiter-notes)
-
-## 0. Submission Checklist
-- GitHub Repository (frontend + backend): `[paste-link-here]`
-- Frontend Deployment (Vercel): `[paste-link-here]`
-- Backend Deployment (Render): `[paste-link-here]`
-- README with setup steps: `Included in this repository`
-- Architecture explanation: `Sections 4 and 9`
-- API documentation: `Section 7`
-- Database schema diagram: `Section 6`
-- Assumptions and trade-offs: `Section 11`
-- Demo credentials:
-  - Email: `[paste-demo-email]`
-  - Password: `[paste-demo-password]`
 
 ## 1. Introduction
 TaskFlow is a real-time collaborative project management app where teams organize work inside workspaces, boards, lists, and tasks.  
