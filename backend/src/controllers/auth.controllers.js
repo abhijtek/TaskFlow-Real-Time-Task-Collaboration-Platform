@@ -9,6 +9,13 @@ import {
   sendEmail,
 } from "../utils/mail.js";
 import jwt, { decode } from "jsonwebtoken";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+};
+
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -110,15 +117,10 @@ const login = asyncHandler(async (req, res) => {
   // setting user cookies
   // cookies require options
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
       new ApiResponse(
         200,
@@ -152,14 +154,10 @@ const logoutUser = asyncHandler(async (req, res) => {
       new: true, // once done  give me most newer obj
     },
   );
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
   return res
     .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
     .json(new ApiResponse(200, {}, "User loggged out"));
 });
 
@@ -252,11 +250,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh Token Expired");
     }
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
-
     const { accessToken, refreshToken: newRefreshToken } =
       generateAccessAndRefreshToken(user._id);
 
@@ -264,8 +257,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     await user.save();
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
       .json(
         new ApiResponse(
           200,
