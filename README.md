@@ -199,6 +199,10 @@ VITE_SOCKET_URL=http://localhost:3000
 
 ## 10. Installation
 ```bash
+# clone repo
+git clone https://github.com/abhijtek/TaskFlow-Real-Time-Task-Collaboration-Platform.git
+cd TaskFlow-Real-Time-Task-Collaboration-Platform
+
 # backend
 cd backend
 npm install
