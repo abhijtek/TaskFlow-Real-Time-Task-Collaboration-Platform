@@ -1,0 +1,38 @@
+{
+    "type": "module",
+  "name": "projmanagement",
+  "version": "1.0.0",
+  "description": "a project management application for beginners",
+  "keywords": [
+    "udemy",
+    "course",
+    "backend",
+    "API",
+    "creation"
+  ],
+  "license": "ISC",
+  "author": "abhijeet",
+  "main": " index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prettier": "3.6.2"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-validator": "^7.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mailgen": "^2.0.31",
+    "mensch": "^0.3.4",
+    "mongoose": "^8.18.0",
+    "nodemailer": "^7.0.9",
+    "socket.io": "^4.7.2"
+  }
+}
