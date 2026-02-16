@@ -22,6 +22,13 @@ export function setupSocketHandlers(io) {
   });
 ///////////////////////////
   io.on("connection", (socket) => {
+    // Task created
+    socket.on("task-created", (task) => {
+      if (task.board) {
+        socket.to(`board-${task.board}`).emit("task-created", task);
+      }
+    });
+
     // Task moved
     socket.on("task-moved", (data) => {
       const { board, taskId, fromList, toList, position } = data;
@@ -41,6 +48,14 @@ export function setupSocketHandlers(io) {
     socket.on("task-updated", (task) => {
       if (task.board) {
         socket.to(`board-${task.board}`).emit("task-updated", task);
+      }
+    });
+
+    // Task deleted
+    socket.on("task-deleted", (data) => {
+      const boardId = data?.board || data?.boardId;
+      if (boardId) {
+        socket.to(`board-${boardId}`).emit("task-deleted", data);
       }
     });
 //////////////////////
