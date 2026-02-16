@@ -8,22 +8,40 @@
 ![License](https://img.shields.io/badge/License-ISC-blue)
 
 ## Table of Contents
+- [0. Submission Checklist](#0-submission-checklist)
 - [1. Introduction](#1-introduction)
 - [2. Features](#2-features)
 - [3. Tech Stack](#3-tech-stack)
 - [4. Architecture Overview](#4-architecture-overview)
 - [5. Project Structure](#5-project-structure)
-- [6. API Summary](#6-api-summary)
-- [7. Socket Events](#7-socket-events)
-- [8. Prerequisites](#8-prerequisites)
-- [9. Environment Variables](#9-environment-variables)
-- [10. Installation](#10-installation)
-- [11. Run Locally](#11-run-locally)
-- [12. Testing](#12-testing)
-- [13. Build for Production](#13-build-for-production)
-- [14. Usage Flow](#14-usage-flow)
-- [15. Security Notes](#15-security-notes)
-- [16. Recruiter Notes](#16-recruiter-notes)
+- [6. Database Schema Diagram](#6-database-schema-diagram)
+- [7. API Documentation](#7-api-documentation)
+- [8. Socket Events](#8-socket-events)
+- [9. Real-Time Sync Strategy](#9-real-time-sync-strategy)
+- [10. Scalability Considerations](#10-scalability-considerations)
+- [11. Assumptions and Trade-offs](#11-assumptions-and-trade-offs)
+- [12. Prerequisites](#12-prerequisites)
+- [13. Environment Variables](#13-environment-variables)
+- [14. Installation](#14-installation)
+- [15. Run Locally](#15-run-locally)
+- [16. Testing](#16-testing)
+- [17. Build for Production](#17-build-for-production)
+- [18. Usage Flow](#18-usage-flow)
+- [19. Security Notes](#19-security-notes)
+- [20. Recruiter Notes](#20-recruiter-notes)
+
+## 0. Submission Checklist
+- GitHub Repository (frontend + backend): `[paste-link-here]`
+- Frontend Deployment (Vercel): `[paste-link-here]`
+- Backend Deployment (Render): `[paste-link-here]`
+- README with setup steps: `Included in this repository`
+- Architecture explanation: `Sections 4 and 9`
+- API documentation: `Section 7`
+- Database schema diagram: `Section 6`
+- Assumptions and trade-offs: `Section 11`
+- Demo credentials:
+  - Email: `[paste-demo-email]`
+  - Password: `[paste-demo-password]`
 
 ## 1. Introduction
 TaskFlow is a real-time collaborative project management app where teams organize work inside workspaces, boards, lists, and tasks.  
@@ -70,6 +88,18 @@ It supports live updates (Socket.IO), role-based workspace membership, task assi
 - Nodemailer + Mailgen (email flows)
 
 ## 4. Architecture Overview
+### Frontend architecture
+- React SPA with route-level separation (`/login`, `/signup`, `/workspaces`, `/workspaces/:workspaceId/boards/:boardId`).
+- Context providers for auth, workspace state, theme, and socket lifecycle.
+- Service layer (`frontend/services/*`) abstracts all API calls from UI components.
+- Realtime UI updates use Socket.IO events plus optimistic local state updates.
+
+### Backend architecture
+- Express modular API with route groups (`/api/auth`, `/api/workspaces`, `/api/boards`, `/api/lists`, `/api/tasks`, `/api/search`, `/api/activities`).
+- Mongoose models for domain entities and shared helper guards for membership checks.
+- Socket.IO server with JWT-authenticated connections and board/workspace rooms.
+- REST endpoints remain source of truth; sockets broadcast state changes across clients.
+
 ### Data model
 - `Workspace` -> has many `Board`
 - `Board` -> has many `List` and `Task`
@@ -110,7 +140,183 @@ frontend/
   tests/
 ```
 
-## 6. API Summary
+## 6. Database Schema Diagram
+```mermaid
+erDiagram
+  USER ||--o{ WORKSPACE : owns
+  USER ||--o{ WORKSPACE_MEMBER : joins
+  USER ||--o{ BOARD_MEMBER : joins
+  USER ||--o{ TASK : creates
+  USER ||--o{ TASK : assigned_to
+
+  WORKSPACE ||--o{ BOARD : contains
+  BOARD ||--o{ LIST : contains
+  LIST ||--o{ TASK : contains
+  BOARD ||--o{ ACTIVITY : logs
+
+  WORKSPACE {
+    ObjectId _id
+    string name
+    string description
+    string color
+    ObjectId owner
+    array members
+  }
+
+  BOARD {
+    ObjectId _id
+    string title
+    string color
+    ObjectId workspace
+    array members
+  }
+
+  LIST {
+    ObjectId _id
+    string title
+    number position
+    ObjectId board
+  }
+
+  TASK {
+    ObjectId _id
+    string title
+    string description
+    string priority
+    date dueDate
+    number position
+    ObjectId list
+    ObjectId board
+    ObjectId assignee
+    ObjectId createdBy
+  }
+
+  ACTIVITY {
+    ObjectId _id
+    string type
+    string entity
+    ObjectId entityId
+    ObjectId board
+    ObjectId user
+    mixed details
+  }
+```
+
+### Schema Design (Collections, Fields, Relations, Indexes)
+#### `users`
+- `_id: ObjectId`
+- `username: String` (unique, indexed)
+- `email: String` (unique)
+- `fullName: String`
+- `password: String` (hashed)
+- `avatar: { url, localPath }`
+- `isEmailVerified: Boolean`
+- `refreshToken: String`
+- `forgotPasswordToken: String`
+- `forgotPasswordExpiry: Date`
+- `emailVerificationToken: String`
+- `emailVerificationExpiry: Date`
+- `createdAt, updatedAt`
+
+#### `workspaces`
+- `_id: ObjectId`
+- `name: String`
+- `description: String`
+- `color: String`
+- `owner: ObjectId -> users._id`
+- `members: [{ user: ObjectId -> users._id, role: \"admin\" | \"member\" }]`
+- `createdAt, updatedAt`
+- Membership checks primarily use `members.user`.
+
+#### `boards`
+- `_id: ObjectId`
+- `title: String`
+- `workspace: ObjectId -> workspaces._id` (indexed)
+- `color: String`
+- `members: [{ user: ObjectId -> users._id, role: \"admin\" | \"member\" }]`
+- `createdAt, updatedAt`
+
+#### `lists`
+- `_id: ObjectId`
+- `title: String`
+- `board: ObjectId -> boards._id` (indexed)
+- `position: Number` (indexed)
+- `createdAt, updatedAt`
+
+#### `tasks`
+- `_id: ObjectId`
+- `title: String`
+- `description: String`
+- `list: ObjectId -> lists._id` (indexed)
+- `board: ObjectId -> boards._id` (indexed)
+- `position: Number` (indexed)
+- `assignee: ObjectId -> users._id | null`
+- `priority: \"low\" | \"medium\" | \"high\" | \"urgent\"`
+- `dueDate: Date | null`
+- `createdBy: ObjectId -> users._id`
+- `createdAt, updatedAt`
+- Text index for search: `{ title: \"text\", description: \"text\" }`
+
+#### `activities`
+- `_id: ObjectId`
+- `type: \"created\" | \"updated\" | \"moved\" | \"deleted\" | \"assigned\"`
+- `entity: \"board\" | \"list\" | \"task\"`
+- `entityId: ObjectId`
+- `board: ObjectId -> boards._id` (indexed)
+- `user: ObjectId -> users._id`
+- `details: Mixed`
+- `createdAt, updatedAt`
+
+### Relationship Rules
+- A workspace contains many boards.
+- A board contains many lists and tasks.
+- A list belongs to one board.
+- A task belongs to one board and one list.
+- A task assignee must be a valid board member.
+- Activity entries are recorded per board-level action.
+
+## 7. API Documentation
+### Auth
+- `POST /api/auth/signup` - create user and return JWT + profile.
+- `POST /api/auth/login` - authenticate and return JWT + profile.
+- `GET /api/auth/me` - fetch currently authenticated user.
+
+### Workspaces
+- `GET /api/workspaces` - list workspaces for authenticated user.
+- `GET /api/workspaces/:id` - workspace detail + `membersData`.
+- `POST /api/workspaces` - create workspace.
+- `PUT /api/workspaces/:id` - update workspace metadata.
+- `DELETE /api/workspaces/:id` - delete workspace and descendants.
+- `POST /api/workspaces/:wsId/members` - invite member by email.
+- `DELETE /api/workspaces/:wsId/members/:userId` - remove member.
+- `PATCH /api/workspaces/:wsId/members/:userId/role` - change role.
+
+### Boards
+- `GET /api/boards?workspace=<workspaceId>` - list boards in workspace.
+- `GET /api/boards/:id` - board detail + lists + tasks + `membersData`.
+- `POST /api/boards` - create board.
+- `PUT /api/boards/:id` - update title/color.
+- `DELETE /api/boards/:id` - delete board and descendants.
+
+### Lists
+- `POST /api/lists` - create list.
+- `PUT /api/lists/:id` - update title/position.
+- `DELETE /api/lists/:id` - delete list and its tasks.
+- `PATCH /api/lists/reorder` - reorder lists by position.
+
+### Tasks
+- `GET /api/tasks?board=<boardId>` - list board tasks.
+- `POST /api/tasks` - create task.
+- `PUT /api/tasks/:id` - update task fields.
+- `DELETE /api/tasks/:id` - delete task.
+- `PATCH /api/tasks/:id/move` - move task to another list and position.
+- `PATCH /api/tasks/:id/assign` - assign/unassign task member.
+
+### Search and Activity
+- `GET /api/search?q=<query>&workspace=<workspaceId>` - search tasks/boards.
+- `GET /api/activities?boardId=<boardId>&page=1&limit=20` - paginated activity feed.
+
+### API Summary (Quick Reference)
 ### Auth
 - `POST /api/auth/signup`
 - `POST /api/auth/login`
@@ -151,7 +357,7 @@ frontend/
 - `GET /api/search?q=<query>&workspace=<workspaceId>`
 - `GET /api/activities?boardId=<boardId>&page=1&limit=20`
 
-## 7. Socket Events
+## 8. Socket Events
 ### Client emits
 - `join-board`, `leave-board`
 - `join-workspace`, `leave-workspace`
@@ -165,12 +371,36 @@ frontend/
 - `board-created`
 - `user-joined`, `user-left` (board presence)
 
-## 8. Prerequisites
+## 9. Real-Time Sync Strategy
+- Client joins board rooms (`join-board`) and workspace rooms (`join-workspace`) after auth socket connect.
+- Mutations are persisted via REST first; frontend emits socket event after successful API response.
+- Server validates event payload and broadcasts to other clients in target room (`socket.to(room).emit(...)`).
+- Receivers update local state with idempotent upsert/delete logic to avoid duplicates.
+- Covered live flows:
+  - task create/update/move/delete
+  - list create/update/delete
+  - board create (workspace scope)
+
+## 10. Scalability Considerations
+- Room-scoped events reduce unnecessary cross-tenant broadcasts.
+- API routes enforce workspace/board membership before data access.
+- MongoDB indexes used on board/list/position fields and text search fields for tasks.
+- Service-layer boundary on frontend simplifies future caching and pagination improvements.
+- Horizontal websocket scaling can be added later via Socket.IO adapter (e.g., Redis).
+
+## 11. Assumptions and Trade-offs
+- Assumes each board belongs to one workspace and users collaborate within that boundary.
+- JWT is stored in `localStorage` for simplicity; cookie-only auth can be used for stricter security.
+- REST is source of truth; websocket events are state propagation, not persistence.
+- Current tests emphasize realtime/service behavior; backend integration tests can be expanded further.
+- Deployment targets assume frontend on Vercel and backend on Render.
+
+## 12. Prerequisites
 - Node.js 18+
 - npm 9+
 - MongoDB database (local or Atlas)
 
-## 9. Environment Variables
+## 13. Environment Variables
 ### Backend (`backend/.env`)
 ```bash
 MONGO_URI=<your_mongodb_uri>
@@ -197,7 +427,7 @@ VITE_SOCKET_URL=http://localhost:3000
 # VITE_USE_MOCK=true
 ```
 
-## 10. Installation
+## 14. Installation
 ```bash
 # clone repo
 git clone https://github.com/abhijtek/TaskFlow-Real-Time-Task-Collaboration-Platform.git
@@ -212,7 +442,7 @@ cd ../frontend
 npm install
 ```
 
-## 11. Run Locally
+## 15. Run Locally
 ### Start backend
 ```bash
 cd backend
@@ -229,7 +459,7 @@ npm run dev
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:3000/api`
 
-## 12. Testing
+## 16. Testing
 ```bash
 cd frontend
 npm run test
@@ -239,7 +469,7 @@ npm run test:coverage
 
 Current tests cover key realtime and socket integration behavior around board creation and sidebar updates.
 
-## 13. Build for Production
+## 17. Build for Production
 ```bash
 cd frontend
 npm run build
@@ -251,7 +481,7 @@ cd backend
 npm start
 ```
 
-## 14. Usage Flow
+## 18. Usage Flow
 1. Create an account or log in.
 2. Create a workspace.
 3. Invite members by email from the workspace sidebar.
@@ -260,12 +490,12 @@ npm start
 6. Create tasks and drag tasks between lists.
 7. Open multiple clients to see realtime updates.
 
-## 15. Security Notes
+## 19. Security Notes
 - Do not commit real `.env` secrets to source control.
 - Rotate secrets immediately if they were exposed.
 - Prefer `httpOnly` cookie-only auth for production if you harden this further.
 
-## 16. Recruiter Notes
+## 20. Recruiter Notes
 - Includes full-stack architecture (React + Node + MongoDB).
 - Demonstrates realtime collaboration with room-scoped Socket.IO events.
 - Includes role-based access controls and API-level membership checks.
