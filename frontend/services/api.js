@@ -4,7 +4,6 @@ import { API_BASE_URL } from "@/lib/constants";
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
-  timeout: 10000,
 });
 
 // Attach JWT token to every request
