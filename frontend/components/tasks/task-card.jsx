@@ -20,7 +20,9 @@ export default function TaskCard({ task, index, onClick }) {
     <motion.div
       onClick={() => onClick?.(task)}
       className={`rounded-lg border bg-card p-3 cursor-pointer transition-all hover:shadow-md ${
-        isOverdue ? "border-red-500/30" : "border-border hover:border-primary/40"
+        isOverdue
+          ? "border-red-500/40 dark:border-red-500/50"
+          : "border-border/70 dark:border-border/60 hover:border-primary/40 dark:hover:border-primary/50"
       }`}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}

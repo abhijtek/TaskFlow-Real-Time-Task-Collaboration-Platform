@@ -29,7 +29,7 @@ function FloatingCard({ className, delay = 0 }) {
       initial={{ opacity: 0, y: 40, rotate: -3 }}
       animate={{ opacity: 1, y: 0, rotate: 0 }}
       transition={{ duration: 0.8, delay, ease: "easeOut" }}
-      className={`absolute rounded-xl border-2 border-primary/40 bg-gradient-to-br from-accent/20 to-primary/10 backdrop-blur-sm shadow-xl ${className}`}
+      className={`absolute rounded-xl border-2 border-primary/15 bg-gradient-to-br from-accent/10 to-primary/6 backdrop-blur-sm shadow-xl opacity-40 dark:opacity-35 ${className}`}
     >
       <div className="p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">

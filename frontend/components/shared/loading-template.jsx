@@ -10,14 +10,14 @@ export default function LoadingTemplate() {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header skeleton */}
-      <div className="space-y-3 bg-secondary/30 rounded-lg p-4 border border-accent/30">
+      <div className="space-y-3 bg-secondary/12 rounded-lg p-4 border border-accent/12">
         <motion.div
-          className="h-3 w-24 rounded-full bg-gradient-to-r from-primary/40 to-accent/40"
+          className="h-3 w-24 rounded-full bg-gradient-to-r from-primary/18 to-accent/18"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
         <motion.div
-          className="h-2 w-full rounded-full bg-accent/20"
+          className="h-2 w-full rounded-full bg-accent/10"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
         />
@@ -28,22 +28,22 @@ export default function LoadingTemplate() {
         {cards.map((card, idx) => (
           <motion.div
             key={idx}
-            className={`${card.width} ${card.height} rounded-lg bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/30 p-4 space-y-2`}
+            className={`${card.width} ${card.height} rounded-lg bg-gradient-to-br from-primary/10 to-accent/5 border border-primary/12 p-4 space-y-2`}
             animate={{ opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 2.5, repeat: Infinity, delay: idx * 0.3 }}
           >
             <motion.div
-              className="h-2 w-3/4 rounded-full bg-primary/40"
+              className="h-2 w-3/4 rounded-full bg-primary/18"
               animate={{ opacity: [0.4, 0.8, 0.4] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
             <motion.div
-              className="h-2 w-1/2 rounded-full bg-accent/30"
+              className="h-2 w-1/2 rounded-full bg-accent/14"
               animate={{ opacity: [0.4, 0.8, 0.4] }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.1 }}
             />
             <motion.div
-              className="h-2 w-2/3 rounded-full bg-primary/20"
+              className="h-2 w-2/3 rounded-full bg-primary/12"
               animate={{ opacity: [0.4, 0.8, 0.4] }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
             />
@@ -52,14 +52,14 @@ export default function LoadingTemplate() {
       </div>
 
       {/* Bottom skeleton */}
-      <div className="space-y-2 bg-accent/10 rounded-lg p-4 border border-accent/20">
+      <div className="space-y-2 bg-accent/4 rounded-lg p-4 border border-accent/10">
         <motion.div
-          className="h-2 w-full rounded-full bg-primary/30"
+          className="h-2 w-full rounded-full bg-primary/14"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
         <motion.div
-          className="h-2 w-5/6 rounded-full bg-accent/25"
+          className="h-2 w-5/6 rounded-full bg-accent/12"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
         />

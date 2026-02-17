@@ -42,7 +42,7 @@ export default function WorkspaceCard({ workspace, boardCount = 0, index = 0, on
               <LayoutDashboard className="w-5 h-5" style={{ color: workspace.color }} />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+              <h3 className="font-semibold text-foreground truncate group-hover:text-foreground/90 transition-colors">
                 {workspace.name}
               </h3>
               {workspace.description && (
