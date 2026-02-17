@@ -7,9 +7,11 @@ import { LayoutDashboard, ChevronRight, Layers, Users, UserPlus, X } from "lucid
 import { boardService } from "@/services/board-service";
 import { Link } from "react-router-dom";
 import { getSocket, joinWorkspace, leaveWorkspace } from "@/lib/socket-client.jsx";
+import { useAuth } from "@/context/auth-context";
 
 export default function Sidebar() {
   const { workspaces, currentWorkspace, fetchWorkspaces, fetchWorkspace, addMember, loading } = useWorkspaces();
+  const { user, loading: authLoading } = useAuth();
   const params = useParams();
   const navigate = useNavigate();
   const workspaceId = params.workspaceId;
@@ -76,11 +78,10 @@ export default function Sidebar() {
   }, [membersOpen, workspaceId, fetchWorkspace]);
 
   useEffect(() => {
-    if (workspaceId) {
-      boardService.list(workspaceId).then(setBoards).catch(() => setBoards([]));
-      fetchWorkspace(workspaceId);
-    }
-  }, [workspaceId, params?.boardId, fetchWorkspace]);
+    if (!workspaceId || authLoading || !user) return;
+    boardService.list(workspaceId).then(setBoards).catch(() => setBoards([]));
+    fetchWorkspace(workspaceId);
+  }, [workspaceId, params?.boardId, fetchWorkspace, authLoading, user]);
 
   const handleInvite = async (e) => {
     e.preventDefault();
