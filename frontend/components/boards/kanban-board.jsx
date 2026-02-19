@@ -305,7 +305,7 @@ export default function KanbanBoard({ board }) {
   }
 
   return (
-    <div className="h-full overflow-auto bg-background/50">
+    <div className="h-full overflow-auto scrollbar-hidden bg-background/50">
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable
           droppableId="board"

@@ -38,7 +38,7 @@ export default function BoardList({
           <motion.div
             ref={dropProvided.innerRef}
             {...dropProvided.droppableProps}
-            className={`flex-1 overflow-y-auto px-3 py-2 min-h-[100px] transition-all rounded-lg ${
+            className={`flex-1 overflow-y-auto scrollbar-hidden px-3 py-2 min-h-[100px] transition-all rounded-lg ${
               dropSnapshot.isDraggingOver ? "bg-primary/10" : "bg-secondary/30"
             }`}
             layout
