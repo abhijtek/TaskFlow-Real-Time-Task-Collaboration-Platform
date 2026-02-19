@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Flag } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -12,18 +13,40 @@ const priorityColors = {
 };
 
 export default function TaskCard({ task, index, onClick }) {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const priority = priorityColors[task.priority] || priorityColors.medium;
   const isOverdue =
     task.dueDate && new Date(task.dueDate) < new Date();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const syncTheme = () => setIsDarkMode(root.classList.contains("dark"));
+
+    syncTheme();
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <motion.div
       onClick={() => onClick?.(task)}
       className={`rounded-lg border bg-card p-3 cursor-pointer transition-all hover:shadow-md ${
         isOverdue
-          ? "border-red-500/40 dark:border-red-400/70 dark:shadow-[0_0_0_1px_rgba(248,113,113,0.15)]"
-          : "border-slate-500 dark:border-white/35 hover:border-slate-600 dark:hover:border-white/55 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+          ? "dark:shadow-[0_0_0_1px_rgba(248,113,113,0.15)]"
+          : "dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
       }`}
+      style={{
+        borderWidth: "1.5px",
+        borderColor: isOverdue
+          ? isDarkMode
+            ? "rgba(248, 113, 113, 0.7)"
+            : "rgba(239, 68, 68, 0.55)"
+          : isDarkMode
+            ? "rgba(255, 255, 255, 0.45)"
+            : "rgba(8, 145, 178, 0.65)",
+      }}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
     >

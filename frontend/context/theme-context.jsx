@@ -3,18 +3,16 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext(undefined);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState("dark");
-
-  useEffect(() => {
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "light";
     const stored = localStorage.getItem("taskflow-theme");
     if (stored === "light" || stored === "dark") {
-      setTheme(stored);
-      return;
+      return stored;
     }
 
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setTheme(prefersDark ? "dark" : "light");
-  }, []);
+    return prefersDark ? "dark" : "light";
+  });
 
   useEffect(() => {
     const html = document.documentElement;
