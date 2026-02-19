@@ -91,7 +91,7 @@ export default function HomePage() {
               className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight"
             >
               Real-Time Task{" "}
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              <span className="text-foreground">
                 Collaboration
               </span>
             </motion.h1>
