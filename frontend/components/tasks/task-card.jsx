@@ -21,8 +21,8 @@ export default function TaskCard({ task, index, onClick }) {
       onClick={() => onClick?.(task)}
       className={`rounded-lg border bg-card p-3 cursor-pointer transition-all hover:shadow-md ${
         isOverdue
-          ? "border-red-500/40 dark:border-red-500/50"
-          : "border-border/70 dark:border-border/60 hover:border-primary/40 dark:hover:border-primary/50"
+          ? "border-red-500/40 dark:border-red-400/70 dark:shadow-[0_0_0_1px_rgba(248,113,113,0.15)]"
+          : "border-border/70 dark:border-white/35 hover:border-primary/40 dark:hover:border-white/55 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
       }`}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
