@@ -38,7 +38,10 @@ router
   .route("/reset-password/:resetToken")
   .post(userResetForgotPasswordValidator(), validate, resetForgotPassword);
 // secure
-router.route("/current-user").post(verifyJWT, getCurrentUser);
+router
+  .route("/current-user")
+  .get(verifyJWT, getCurrentUser)
+  .post(verifyJWT, getCurrentUser);
 router
   .route("/change-password")
   .post(

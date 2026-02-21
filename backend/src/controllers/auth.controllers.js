@@ -10,10 +10,13 @@ import {
 } from "../utils/mail.js";
 import jwt, { decode } from "jsonwebtoken";
 
+const runtimeEnv = String(process.env.NODE_ENV || "development").toLowerCase();
+const isProductionEnv = runtimeEnv === "production" || runtimeEnv === "prod";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: isProductionEnv,
+  sameSite: isProductionEnv ? "none" : "lax",
 };
 
 const generateAccessAndRefreshToken = async (userId) => {
